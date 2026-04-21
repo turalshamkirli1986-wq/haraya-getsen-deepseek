@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Haraya Getsən - AI Səyahət Köməkçisi</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  background: #060e1a;
+  color: white;
+}
+
+/* API Panel */
+.api-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #060e1a;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.api-card {
+  background: #162f5a;
+  border-radius: 24px;
+  padding: 32px;
+  max-width: 400px;
+  text-align: center;
+  border: 1px solid #ff6b0033;
+}
+
+.api-card input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #ff6b00;
+  background: #0d2b55;
+  color: white;
+  margin: 15px 0;
+  font-size: 14px;
+}
+
+.api-card button {
+  background: #ff6b00;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+}
+
+.api-card button:hover {
+  background: #ff8c35;
+}
+
+/* Header */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(6,14,26,0.95);
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+  border-bottom: 1px solid #ff6b0026;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.logo span {
+  color: #ff6b00;
+}
+
+/* Main Content */
+.main {
+  padding-top: 60px;
+  padding-bottom: 80px;
+}
+
+/* Search Section */
+.search-section {
+  padding: 16px 20px;
+}
+
+.search-box {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid #ff6b0040;
+  background: rgba(255,255,255,0.06);
+  color: white;
+  font-size: 16px;
+}
+
+.search-box:focus {
+  outline: none;
+  border-color: #ff6b00;
+}
+
+/* City Tags */
+.tags {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 12px 20px;
+}
+
+.tag {
+  background: rgba(255,255,255,0.06);
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.tag:hover, .tag.active {
+  background: rgba(255,107,0,0.2);
+  border-color: #ff6b00;
+  color: #ff6b00;
+}
+
+/* City Page */
+.city-page {
+  display: none;
+}
+
+.city-page.show {
+  display: block;
+}
+
+/* City Banner */
+.city-banner {
+  height: 240px;
+  background: linear-gradient(135deg, #0d2b55, #060e1a);
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 20px;
+}
+
+.banner-content {
+  position: relative;
+  z-index: 2;
+}
+
+.banner-flag {
+  font-size: 40px;
+}
+
+.banner-title {
+  font-size: 32px;
+  font-weight: bold;
+  letter-spacing: -1px;
+}
+
+.banner-sub {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* Tabs */
+.city-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 16px 20px;
+  overflow-x: auto;
+}
+
+.ctab {
+  background: rgba(255,255,255,0.06);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 30px;
+  color: #8899aa;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ctab.active {
+  background: #ff6b00;
+  color: white;
+}
+
+/* Video Feed */
+.video-feed {
+  display: none;
+  padding: 0 20px;
+}
+
+.video-feed.active {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.vcard {
+  background: #162f5a;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.vscreen {
+  height: 240px;
+  background: linear-gradient(135deg, #0a1520, #0d1f35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60px;
+  position: relative;
+}
+
+.vtag-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #ff6b00;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.vdur {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0,0,0,0.6);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+.vplay-btn {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vplay-circle {
+  width: 56px;
+  height: 56px;
+  background: rgba(255,107,0,0.85);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.vbar {
+  padding: 14px;
+}
+
+.vbar-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.vbar-desc {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-bottom: 12px;
+}
+
+.vbar-acts {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.vba {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 6px 12px;
+  border-radius: 30px;
+  font-size: 11px;
+  cursor: pointer;
+  color: white;
+}
+
+/* Places Grid */
+.places-wrap {
+  display: none;
+  padding: 0 20px;
+}
+
+.places-wrap.active {
+  display: block;
+}
+
+.places-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.pcard {
+  background: #162f5a;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.pcard-img {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  position: relative;
+}
+
+.pcard-type {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: rgba(0,0,0,0.7);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 9px;
+}
+
+.pcard-rate {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #ff6b00;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 9px;
+}
+
+.pcard-body {
+  padding: 10px;
+}
+
+.pcard-name {
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.pcard-desc {
+  font-size: 11px;
+  opacity: 0.7;
+  margin: 4px 0;
+}
+
+/* Tour Section */
+.tour-wrap {
+  display: none;
+  padding: 0 20px;
+}
+
+.tour-wrap.active {
+  display: block;
+}
+
+.tour-days {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.tour-day-btn {
+  background: rgba(255,255,255,0.06);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 30px;
+  color: white;
+  cursor: pointer;
+}
+
+.tour-day-btn.active {
+  background: #ff6b00;
+}
+
+.tour-gen-btn {
+  width: 100%;
+  background: #ff6b00;
+  border: none;
+  padding: 14px;
+  border-radius: 14px;
+  color: white;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.tour-result {
+  background: rgba(255,255,255,0.04);
+  border-radius: 16px;
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  display: none;
+}
+
+.tour-result.show {
+  display: block;
+}
+
+.tour-loading {
+  text-align: center;
+  padding: 20px;
+  display: none;
+}
+
+.tour-loading.show {
+  display: block;
+}
+
+/* AI Chat */
+.ai-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 54px;
+  height: 54px;
+  background: #ff6b00;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 4px 20px rgba(255,107,0,0.5);
+  z-index: 200;
+}
+
+.ai-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #162f5a;
+  border-radius: 24px 24px 0 0;
+  z-index: 300;
+  transform: translateY(100%);
+  transition: transform 0.3s;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-drawer.open {
+  transform: translateY(0);
+}
+
+.ai-handle {
+  width: 40px;
+  height: 4px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 2px;
+  margin: 12px auto;
+}
+
+.ai-dhead {
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ai-msgs {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 400px;
+}
+
+.msg {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 13px;
+}
+
+.msg-ai {
+  background: rgba(255,255,255,0.08);
+  align-self: flex-start;
+}
+
+.msg-user {
+  background: #ff6b00;
+  align-self: flex-end;
+}
+
+.ai-inp-row {
+  padding: 12px 20px;
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.ai-inp {
+  flex: 1;
+  background: rgba(255,255,255,0.08);
+  border: none;
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+}
+
+.ai-send-btn {
+  background: #ff6b00;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #00d4c0;
+  color: #000;
+  padding: 8px 20px;
+  border-radius: 30px;
+  font-size: 13px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 400;
+}
+
+.toast.show {
+  opacity: 1;
+}
+
+/* Popular Section */
+.popular-section {
+  padding: 20px;
+}
+
+.pop-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.pop-title span {
+  color: #ff6b00;
+}
+
+.pop-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.pop-card {
+  background: #162f5a;
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.pop-flag {
+  font-size: 28px;
+}
+
+.pop-name {
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+@media (min-width: 768px) {
+  .places-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .pop-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- API Panel -->
+<div id="apiPanel" class="api-panel">
+  <div class="api-card">
+    <div style="font-size: 48px; margin-bottom: 16px;">✈️</div>
+    <h2>Haraya <span style="color:#ff6b00">Getsən</span></h2>
+    <p style="margin: 12px 0; color: #8899aa;">AI səyahət köməkçisini aktivləşdirmək üçün API açarınızı daxil edin</p>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api...">
+    <div id="apiError" style="color:#ff4444; font-size:12px; margin-bottom:10px; display:none;"></div>
+    <button onclick="saveApiKey()">Aktivləşdir</button>
+    <p style="margin-top: 16px; font-size: 11px; color: #8899aa;">
+      🔑 <a href="https://console.anthropic.com" target="_blank" style="color:#ff6b00">Anthropic Console</a> -dan pulsuz açar alın
+    </p>
+  </div>
+</div>
+
+<!-- Header -->
+<header>
+  <div class="logo" onclick="goHome()">✈️ Haraya <span>Getsən</span></div>
+  <div style="display: flex; gap: 10px;">
+    <div style="background: rgba(255,107,0,0.15); padding: 4px 10px; border-radius: 20px; font-size: 11px;">🤖 Claude AI</div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<div class="main" id="mainContent">
+
+  <!-- Search -->
+  <div class="search-section">
+    <input type="text" class="search-box" id="searchInput" placeholder="Şəhər axtar... Dubai, İstanbul, Bakı, Paris..." onkeypress="if(event.key==='Enter') searchCity()">
+  </div>
+
+  <!-- City Tags -->
+  <div class="tags" id="cityTags">
+    <span class="tag" onclick="searchCityText('Dubai')">🇦🇪 Dubai</span>
+    <span class="tag" onclick="searchCityText('İstanbul')">🇹🇷 İstanbul</span>
+    <span class="tag" onclick="searchCityText('Paris')">🇫🇷 Paris</span>
+    <span class="tag" onclick="searchCityText('Bakı')">🇦🇿 Bakı</span>
+    <span class="tag" onclick="searchCityText('Kahirə')">🇪🇬 Kahirə</span>
+    <span class="tag" onclick="searchCityText('Tokyo')">🇯🇵 Tokyo</span>
+    <span class="tag" onclick="searchCityText('Roma')">🇮🇹 Roma</span>
+    <span class="tag" onclick="searchCityText('Bali')">🇮🇩 Bali</span>
+  </div>
+
+  <!-- City Page -->
+  <div id="cityPage" class="city-page">
+    <div class="city-banner" id="cityBanner">
+      <div class="banner-content">
+        <div class="banner-flag" id="bannerFlag">🇦🇪</div>
+        <div class="banner-title" id="bannerTitle">DUBAI</div>
+        <div class="banner-sub" id="bannerSub">LUXURY • ADVENTURE</div>
+      </div>
+    </div>
+
+    <div class="city-tabs" id="cityTabs"></div>
+
+    <div id="tabVideo" class="video-feed active"></div>
+    <div id="tabPlaces" class="places-wrap"></div>
+    <div id="tabTour" class="tour-wrap">
+      <div class="tour-days">
+        <button class="tour-day-btn active" onclick="setTourDays(2,this)">2 Gün</button>
+        <button class="tour-day-btn" onclick="setTourDays(3,this)">3 Gün</button>
+        <button class="tour-day-btn" onclick="setTourDays(5,this)">5 Gün</button>
+        <button class="tour-day-btn" onclick="setTourDays(7,this)">7 Gün</button>
+      </div>
+      <button class="tour-gen-btn" onclick="generateTourPlan()">✨ Claude AI ilə Tur Planı Hazırla</button>
+      <div class="tour-loading" id="tourLoading">✈️ Claude AI tur planı hazırlayır...</div>
+      <div class="tour-result" id="tourResult"></div>
+    </div>
+  </div>
+
+  <!-- Popular Cities -->
+  <div class="popular-section" id="popularSection">
+    <div class="pop-title">Populyar <span>Şəhərlər</span></div>
+    <div class="pop-grid" id="popGrid"></div>
+  </div>
+
+</div>
+
+<!-- AI Chat -->
+<button class="ai-fab" onclick="toggleChat()">🤖</button>
+<div class="ai-drawer" id="aiDrawer">
+  <div class="ai-handle"></div>
+  <div class="ai-dhead">
+    <span>🤖 Claude AI - Səyahət Köməkçisi</span>
+    <button onclick="toggleChat()" style="background:none; border:none; color:white; font-size:20px;">✕</button>
+  </div>
+  <div class="ai-msgs" id="chatMessages">
+    <div class="msg msg-ai">Salam! Mən Claude AI səyahət köməkçinizəm. 🌍<br><br>Hansı şəhər haqqında məlumat istəyirsiniz?</div>
+  </div>
+  <div class="ai-inp-row">
+    <input type="text" class="ai-inp" id="chatInput" placeholder="Sual yazın..." onkeypress="if(event.key==='Enter') sendChatMessage()">
+    <button class="ai-send-btn" onclick="sendChatMessage()">➤</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">✅ Hazırdır!</div>
+
+<script>
+// ===================== ŞƏHƏR MƏLUMATLARI =====================
+const CITIES_DATA = {
+  dubai: {
+    name: 'Dubai',
+    flag: '🇦🇪',
+    title: 'DUBAI',
+    subtitle: 'LUXURY • ADVENTURE • FUTURE',
+    videos: [
+      { tag: 'BURJ KHALIFA', title: 'Burj Khalifa', desc: 'Dünyanın ən hündür binası - 828 metr', emoji: '🏙️' },
+      { tag: 'PALM ISLAND', title: 'Palm Jumeirah', desc: 'Xurma formasında süni ada', emoji: '🌴' },
+      { tag: 'DUBAI MALL', title: 'Dubai Mall', desc: 'Dünyanın ən böyük ticarət mərkəzi', emoji: '🛍️' },
+      { tag: 'DESERT SAFARI', title: 'Səhra Safarisi', desc: '4x4 off-road, dəvə gəzintisi', emoji: '🐪' }
+    ],
+    places: {
+      tourist: [
+        { name: 'Burj Xəlifə', emoji: '🏙️', desc: 'Dünyanın ən hündür binası', price: '150 AED', rating: '⭐ 4.9' },
+        { name: 'Palm Jumeirah', emoji: '🌴', desc: 'Xurma adası', price: 'Pulsuz', rating: '⭐ 4.8' },
+        { name: 'Dubai Fəvvarəsi', emoji: '⛲', desc: 'Dünyanın ən böyük fəvvarəsi', price: 'Pulsuz', rating: '⭐ 4.9' }
+      ],
+      restaurant: [
+        { name: 'Nobu Dubai', emoji: '🍣', desc: 'Yapon-Peru mətbəxi', price: '300+ AED', rating: '⭐ 4.8' },
+        { name: 'Arabian Tea House', emoji: '🍵', desc: 'Ənənəvi Ərəb mətbəxi', price: '50-120 AED', rating: '⭐ 4.6' }
+      ],
+      hotel: [
+        { name: 'Burj Al Arab', emoji: '⛵', desc: '7 ulduzlu otel', price: '5000+ AED', rating: '⭐ 5.0' },
+        { name: 'Atlantis The Palm', emoji: '🏨', desc: 'Palm adasında lüks otel', price: '1200+ AED', rating: '⭐ 4.9' }
+      ]
+    }
+  },
+  istanbul: {
+    name: 'İstanbul',
+    flag: '🇹🇷',
+    title: 'İSTANBUL',
+    subtitle: 'WHERE EAST MEETS WEST',
+    videos: [
+      { tag: 'AYASOFYA', title: 'Ayasofya', desc: '1500 illik tarix', emoji: '🕌' },
+      { tag: 'BOĞAZ', title: 'Boğaz Turu', desc: 'İki qitə arasında gəzinti', emoji: '⛵' },
+      { tag: 'BAZAR', title: 'Qrand Bazaar', desc: 'Dünyanın ən köhnə bazarlarından', emoji: '🏪' }
+    ],
+    places: {
+      tourist: [
+        { name: 'Ayasofya', emoji: '🕌', desc: 'Bizans və Osmanlı mirası', price: '400 TL', rating: '⭐ 4.9' },
+        { name: 'Topkapı Sarayı', emoji: '🏯', desc: 'Osmanlı sultanlarının evi', price: '500 TL', rating: '⭐ 4.8' }
+      ],
+      restaurant: [
+        { name: 'Sultanahmet Köftecisi', emoji: '🥩', desc: 'Məşhur köfte', price: '100 TL', rating: '⭐ 4.7' },
+        { name: 'Hafız Mustafa', emoji: '🍰', desc: 'Ənənəvi türk şirniyyatları', price: '150 TL', rating: '⭐ 4.8' }
+      ]
+    }
+  },
+  baku: {
+    name: 'Bakı',
+    flag: '🇦🇿',
+    title: 'BAKI',
+    subtitle: 'CITY OF WINDS & FIRE',
+    videos: [
+      { tag: 'ALOV QÜLLƏLƏRİ', title: 'Alov Qüllələri', desc: 'Bakının simvolu', emoji: '🔥' },
+      { tag: 'İÇƏRİŞƏHƏR', title: 'İçərişəhər', desc: 'Qədim şəhər divarları', emoji: '🏰' },
+      { tag: 'BULVAR', title: 'Sahil Bulvarı', desc: 'Xəzər kənarında gəzinti', emoji: '🌊' }
+    ],
+    places: {
+      tourist: [
+        { name: 'Alov Qüllələri', emoji: '🔥', desc: 'Bakının ən hündür binaları', price: 'Pulsuz', rating: '⭐ 4.9' },
+        { name: 'İçərişəhər', emoji: '🏰', desc: 'UNESCO irsi', price: 'Pulsuz', rating: '⭐ 4.8' }
+      ],
+      restaurant: [
+        { name: 'Nur Restoran', emoji: '🍽️', desc: 'Azərbaycan milli mətbəxi', price: '50-100 AZN', rating: '⭐ 4.7' },
+        { name: 'Firuze', emoji: '🥘', desc: 'Ənənəvi plov', price: '40-80 AZN', rating: '⭐ 4.6' }
+      ]
+    }
+  },
+  paris: {
+    name: 'Paris',
+    flag: '🇫🇷',
+    title: 'PARİS',
+    subtitle: 'THE CITY OF LIGHT',
+    videos: [
+      { tag: 'EYFEL', title: 'Eyfel Qülləsi', desc: 'Fransanın simvolu', emoji: '🗼' },
+      { tag: 'LUVR', title: 'Luvr Muzeyi', desc: 'Mona Liza', emoji: '🎨' }
+    ],
+    places: {
+      tourist: [
+        { name: 'Eyfel Qülləsi', emoji: '🗼', desc: 'Parisin simvolu', price: '25€', rating: '⭐ 4.9' },
+        { name: 'Luvr Muzeyi', emoji: '🏛️', desc: 'Dünyanın ən böyük muzeyi', price: '17€', rating: '⭐ 4.9' }
+      ]
+    }
+  }
+};
+
+let currentCity = null;
+let apiKey = '';
+let tourDays = 2;
+let isChatOpen = false;
+
+// ===================== API KEY =====================
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('sk-ant')) {
+    document.getElementById('apiError').style.display = 'block';
+    document.getElementById('apiError').textContent = '❌ API açarı sk-ant- ilə başlamalıdır';
+    return;
+  }
+  apiKey = key;
+  localStorage.setItem('claude_api_key', key);
+  document.getElementById('apiPanel').style.display = 'none';
+  showToast('✅ API açarı aktivləşdi!');
+  loadPopularCities();
+}
+
+function getApiKey() {
+  if (!apiKey) {
+    const saved = localStorage.getItem('claude_api_key');
+    if (saved && saved.startsWith('sk-ant')) {
+      apiKey = saved;
+      document.getElementById('apiPanel').style.display = 'none';
+      loadPopularCities();
+    }
+  }
+  return apiKey;
+}
+
+// ===================== UI FUNCTIONS =====================
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+function loadPopularCities() {
+  const grid = document.getElementById('popGrid');
+  const cities = Object.keys(CITIES_DATA);
+  grid.innerHTML = cities.map(key => `
+    <div class="pop-card" onclick="loadCity('${key}')">
+      <div class="pop-flag">${CITIES_DATA[key].flag}</div>
+      <div class="pop-name">${CITIES_DATA[key].name}</div>
+    </div>
+  `).join('');
+}
+
+function searchCityText(cityName) {
+  const key = Object.keys(CITIES_DATA).find(k => CITIES_DATA[k].name === cityName);
+  if (key) loadCity(key);
+}
+
+function searchCity() {
+  const query = document.getElementById('searchInput').value.trim().toLowerCase();
+  const key = Object.keys(CITIES_DATA).find(k => CITIES_DATA[k].name.toLowerCase() === query);
+  if (key) loadCity(key);
+  else showToast('❌ Şəhər tapılmadı');
+}
+
+function goHome() {
+  currentCity = null;
+  document.getElementById('cityPage').classList.remove('show');
+  document.getElementById('popularSection').style.display = 'block';
+  document.getElementById('searchInput').value = '';
+}
+
+function loadCity(cityKey) {
+  currentCity = cityKey;
+  const city = CITIES_DATA[cityKey];
+  
+  document.getElementById('popularSection').style.display = 'none';
+  document.getElementById('cityPage').classList.add('show');
+  
+  // Banner
+  document.getElementById('bannerFlag').textContent = city.flag;
+  document.getElementById('bannerTitle').textContent = city.title;
+  document.getElementById('bannerSub').textContent = city.subtitle;
+  
+  // Tabs
+  const tabsContainer = document.getElementById('cityTabs');
+  const tabs = ['video', 'tourist', 'restaurant', 'hotel', 'tour'];
+  const tabNames = ['🎥 Videolar', '🏛️ Turistik', '🍽️ Restoranlar', '🏨 Otellər', '🗓️ AI Tur'];
+  tabsContainer.innerHTML = tabs.map((tab, i) => 
+    `<button class="ctab ${i === 0 ? 'active' : ''}" onclick="switchTab('${tab}')">${tabNames[i]}</button>`
+  ).join('');
+  
+  // Videos
+  renderVideos(city.videos);
+  
+  // Places
+  renderPlaces('tourist', city.places.tourist || []);
+  
+  // AI mesajı
+  addChatMessage('ai', `✨ ${city.flag} ${city.name} şəhərini seçdiniz! Bu gözəl şəhər haqqında nə bilmək istəyirsiniz?\n\n• 🗓️ Tur planı hazırlayaq?\n• 🏨 Otel tövsiyəsi?\n• 🍽️ Restoranlar?\n• 💰 Büdcə məsləhəti?`);
+}
+
+function renderVideos(videos) {
+  const container = document.getElementById('tabVideo');
+  container.innerHTML = videos.map(v => `
+    <div class="vcard">
+      <div class="vscreen">
+        <div style="font-size: 48px;">${v.emoji}</div>
+        <div class="vtag-badge">${v.tag}</div>
+        <div class="vdur">🎬 15s</div>
+        <div class="vplay-btn"><div class="vplay-circle">▶</div></div>
+      </div>
+      <div class="vbar">
+        <div class="vbar-title">${v.title}</div>
+        <div class="vbar-desc">${v.desc}</div>
+        <div class="vbar-acts">
+          <button class="vba" onclick="showToast('🎬 Video izlənilir')">▶ İzlə</button>
+          <button class="vba" onclick="askAIAbout('${v.title}')">🤖 AI soruş</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderPlaces(type, places) {
+  const container = document.getElementById('tabPlaces');
+  if (!places.length) {
+    container.innerHTML = `<div style="text-align:center; padding:40px;">🤖 Məlumat yoxdur. AI-dan soruşun!</div>`;
+    return;
+  }
+  container.innerHTML = `<div class="places-grid">${places.map(p => `
+    <div class="pcard" onclick="showPlaceDetail('${p.name}', '${p.desc}', '${p.price}', '${p.rating}')">
+      <div class="pcard-img"><div style="font-size:36px;">${p.emoji}</div><div class="pcard-type">${type}</div><div class="pcard-rate">${p.rating}</div></div>
+      <div class="pcard-body">
+        <div class="pcard-name">${p.name}</div>
+        <div class="pcard-desc">${p.desc}</div>
+        <div class="pcard-foot"><span class="pcard-price">${p.price}</span></div>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.ctab').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  document.getElementById('tabVideo').classList.remove('active');
+  document.getElementById('tabPlaces').classList.remove('active');
+  document.getElementById('tabTour').classList.remove('active');
+  
+  if (tab === 'video') {
+    document.getElementById('tabVideo').classList.add('active');
+  } else if (tab === 'tour') {
+    document.getElementById('tabTour').classList.add('active');
+  } else {
+    document.getElementById('tabPlaces').classList.add('active');
+    const city = CITIES_DATA[currentCity];
+    const places = city.places[tab] || [];
+    renderPlaces(tab, places);
+  }
+}
+
+function showPlaceDetail(name, desc, price, rating) {
+  showToast(`${name}: ${desc} | Qiymət: ${price} | ${rating}`);
+}
+
+// ===================== TUR PLANI =====================
+function setTourDays(days, btn) {
+  tourDays = days;
+  document.querySelectorAll('.tour-day-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+async function generateTourPlan() {
+  if (!currentCity) return;
+  if (!getApiKey()) {
+    document.getElementById('apiPanel').style.display = 'flex';
+    return;
+  }
+  
+  const city = CITIES_DATA[currentCity];
+  const loading = document.getElementById('tourLoading');
+  const resultDiv = document.getElementById('tourResult');
+  
+  loading.classList.add('show');
+  resultDiv.classList.remove('show');
+  
+  const prompt = `${city.name} şəhəri üçün ${tourDays} günlük səyahət planı hazırla. 
+Hər gün üçün səhər, gündüz, axşam fəaliyyətləri göstər.
+Restoran, otel və nəqliyyat tövsiyələri ver.
+Təxmini büdcə yaz.
+Azərbaycan dilində, emojili və praktik yaz.`;
+  
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
+        'x-api-key': apiKey
+      },
+      body: JSON.stringify({
+        model: 'claude-3-sonnet-20241022',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    
+    if (!response.ok) throw new Error('API error');
+    
+    const data = await response.json();
+    const text = data.content[0].text;
+    resultDiv.innerHTML = text.replace(/\n/g, '<br>');
+    resultDiv.classList.add('show');
+    showToast('✅ Tur planı hazırdır!');
+    
+  } catch (error) {
+    console.error(error);
+    resultDiv.innerHTML = '⚠️ Xəta baş verdi. Yenidən cəhd edin.';
+    resultDiv.classList.add('show');
+  } finally {
+    loading.classList.remove('show');
+  }
+}
+
+// ===================== AI CHAT =====================
+function toggleChat() {
+  isChatOpen = !isChatOpen;
+  document.getElementById('aiDrawer').classList.toggle('open', isChatOpen);
+}
+
+function addChatMessage(role, content) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `msg msg-${role}`;
+  div.innerHTML = content.replace(/\n/g, '<br>');
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  const message = input.value.trim();
+  if (!message) return;
+  if (!getApiKey()) {
+    document.getElementById('apiPanel').style.display = 'flex';
+    return;
+  }
+  
+  addChatMessage('user', message);
+  input.value = '';
+  
+  const cityInfo = currentCity ? CITIES_DATA[currentCity].name : 'hər hansı';
+  const systemPrompt = `Sən səyahət köməkçisisən. Cari şəhər: ${cityInfo}. 
+Azərbaycan dilində cavab ver. Qısa, praktik və emojili yaz.`;
+  
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
+        'x-api-key': apiKey
+      },
+      body: JSON.stringify({
+        model: 'claude-3-sonnet-20241022',
+        max_tokens: 500,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: message }]
+      })
+    });
+    
+    if (!response.ok) throw new Error('API error');
+    
+    const data = await response.json();
+    addChatMessage('ai', data.content[0].text);
+    
+  } catch (error) {
+    console.error(error);
+    addChatMessage('ai', '⚠️ Xəta baş verdi. Yenidən cəhd edin.');
+  }
+}
+
+function askAIAbout(topic) {
+  if (!getApiKey()) {
+    document.getElementById('apiPanel').style.display = 'flex';
+    return;
+  }
+  toggleChat();
+  setTimeout(() => {
+    document.getElementById('chatInput').value = `${topic} haqqında ətraflı məlumat ver`;
+    sendChatMessage();
+  }, 300);
+}
+
+// ===================== START =====================
+getApiKey();
+
+// Əgər API key yoxdursa, paneli göstər
+if (!apiKey) {
+  document.getElementById('apiPanel').style.display = 'flex';
+}
+</script>
+</body>
+</html>
